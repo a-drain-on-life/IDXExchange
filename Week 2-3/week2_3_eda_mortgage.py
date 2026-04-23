@@ -116,15 +116,19 @@ for i, col in enumerate(key_fields):
     if col not in sold.columns:
         continue
     data = sold[col].dropna()
+    # Clip display to 99th percentile so outliers don't crush the axis scale
+    p99 = data.quantile(0.99)
+    display_data = data[data <= p99]
+    outlier_count = len(data) - len(display_data)
     # Histogram
-    axes[0, i].hist(data, bins=50, edgecolor='none', color='steelblue')
-    axes[0, i].set_title(f'{col} — Histogram')
+    axes[0, i].hist(display_data, bins=50, edgecolor='none', color='steelblue')
+    axes[0, i].set_title(f'{col}\n({outlier_count:,} outliers above 99th pct hidden)', fontsize=10)
     axes[0, i].set_xlabel(col)
     axes[0, i].set_ylabel('Count')
     # Boxplot
-    axes[1, i].boxplot(data, vert=False, patch_artist=True,
+    axes[1, i].boxplot(display_data, vert=False, patch_artist=True,
                        boxprops=dict(facecolor='steelblue', alpha=0.6))
-    axes[1, i].set_title(f'{col} — Boxplot')
+    axes[1, i].set_title(f'{col} — Boxplot', fontsize=10)
     axes[1, i].set_xlabel(col)
 
 plt.tight_layout()
